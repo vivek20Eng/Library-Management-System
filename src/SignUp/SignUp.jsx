@@ -1,132 +1,139 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import LMButton from "../Component/LMButton";
 import Link from "next/link";
 import apiService from "../lib/api/useApi.js";
 
 function SignUp() {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [address, setAddress] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    address: "",
+    phoneNumber: "",
+  });
 
-  const [fullNameError, setFullNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [addressError, setAddressError] = useState("");
-  const [phoneNumberError, setPhoneNumberError] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [formTouched, setFormTouched] = useState(false); 
 
-  const validateFullName = () => {
-    if (!fullName.trim()) {
-      setFullNameError("Full Name is required");
-    } else {
-      setFullNameError("");
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+
+    // Validate the field onChange
+    validateField(name, value);
   };
 
-  const validateEmail = () => {
-    if (!email.trim()) {
-      setEmailError("Email is required");
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError("Invalid email address");
-    } else {
-      setEmailError("");
-    }
-  };
+  const validateField = (name, value) => {
+    const newErrors = { ...errors };
 
-  const validatePassword = () => {
-    if (!password.trim()) {
-      setPasswordError("Password is required");
-    } else if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters long");
-    } else {
-      setPasswordError("");
+    switch (name) {
+      case "fullName":
+        newErrors.fullName = value.trim() ? "" : "Full Name is required";
+        break;
+      case "email":
+        newErrors.email = value.trim()
+          ? /\S+@\S+\.\S+/.test(value)
+            ? ""
+            : "Invalid email address"
+          : "Email is required";
+        break;
+      case "password":
+        newErrors.password =
+          value.trim().length >= 6
+            ? ""
+            : "Password must be at least 6 characters long";
+        break;
+      case "confirmPassword":
+        newErrors.confirmPassword =
+          value === formData.password ? "" : "Passwords do not match";
+        break;
+      case "address":
+        newErrors.address = value.trim() ? "" : "Address is required";
+        break;
+      case "phoneNumber":
+        newErrors.phoneNumber = value.trim() ? "" : "Phone Number is required";
+        break;
+      default:
+        break;
     }
-  };
 
-  const validateConfirmPassword = () => {
-    if (password !== confirmPassword) {
-      setConfirmPasswordError("Passwords do not match");
-    } else {
-      setConfirmPasswordError("");
-    }
-  };
-
-  const validateAddress = () => {
-    if (!address.trim()) {
-      setAddressError("Address is required");
-    } else {
-      setAddressError("");
-    }
-  };
-
-  const validatePhoneNumber = () => {
-    if (!phoneNumber.trim()) {
-      setPhoneNumberError("Phone Number is required");
-    } else {
-      setPhoneNumberError("");
-    }
+    setErrors(newErrors);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
 
-    setError("");
-    // Validate all fields
-    validateFullName();
-    validateEmail();
-    validatePassword();
-    validateConfirmPassword();
-    validateAddress();
-    validatePhoneNumber();
+    const isValid = validateFormData();
 
-    // Set form as touched once any input is interacted with
-    setFormTouched(true);
-
-    // Check if any errors exist and form has been touched
-    if (
-      formTouched &&
-      !fullNameError &&
-      !emailError &&
-      !passwordError &&
-      !confirmPasswordError &&
-      !addressError &&
-      !phoneNumberError
-    ) {
+    if (isValid) {
       try {
-        // Set loading state to true
         setLoading(true);
-        // Make API request if all fields are valid
-        const response = await apiService.post("api/signup", {
-          fullName,
-          email,
-          password,
-          address,
-          phoneNumber,
-        });
+        const response = await apiService.post("api/signup", formData);
         handleToken(response);
-        console.log(response, "sdaddata");
-        // Handle success response
+        // Reset submitError state on successful submission
+        setSubmitError("");
       } catch (error) {
         console.error("Error:", error);
-        setError("Registration failed");
-        // Handle error response
+        setSubmitError("Registration failed. Please try again.");
       } finally {
-        // Set loading state to false
         setLoading(false);
       }
+    } else {
+      setSubmitError("Please fill in all fields correctly.");
     }
   };
 
+  const validateFormData = () => {
+    const newErrors = {};
+
+    // Validation logic...
+    Object.keys(formData).forEach((key) => {
+      const value = formData[key];
+      switch (key) {
+        case "fullName":
+          newErrors.fullName = value.trim() ? "" : "Full Name is required";
+          break;
+        case "email":
+          newErrors.email = value.trim()
+            ? /\S+@\S+\.\S+/.test(value)
+              ? ""
+              : "Invalid email address"
+            : "Email is required";
+          break;
+        case "password":
+          newErrors.password =
+            value.trim().length >= 6
+              ? ""
+              : "Password must be at least 6 characters long";
+          break;
+        case "confirmPassword":
+          newErrors.confirmPassword =
+            value === formData.password ? "" : "Passwords do not match";
+          break;
+        case "address":
+          newErrors.address = value.trim() ? "" : "Address is required";
+          break;
+        case "phoneNumber":
+          newErrors.phoneNumber = value.trim()
+            ? ""
+            : "Phone Number is required";
+          break;
+        default:
+          break;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every((error) => error === "");
+  };
+
   const handleToken = (token) => {
-    console.log(token, "token");
-    // Store token in local storage or session storage
     localStorage.setItem("token", token);
     // Redirect user to dashboard or another page
     // Example: history.push('/dashboard');
@@ -139,73 +146,73 @@ function SignUp() {
           <input
             type="text"
             placeholder="Full Name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            onBlur={validateFullName}
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
             className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
           />
-          {fullNameError && <p className="text-red-500">{fullNameError}</p>}
+          {errors.fullName && <p className="text-red-500">{errors.fullName}</p>}
 
           <input
             type="email"
             placeholder="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onBlur={validateEmail}
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
           />
-          {emailError && <p className="text-red-500">{emailError}</p>}
+          {errors.email && <p className="text-red-500">{errors.email}</p>}
 
           <input
             type="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onBlur={validatePassword}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
             className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
           />
-          {passwordError && <p className="text-red-500">{passwordError}</p>}
+          {errors.password && <p className="text-red-500">{errors.password}</p>}
 
           <input
             type="password"
             placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            onBlur={validateConfirmPassword}
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
             className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
           />
-          {confirmPasswordError && (
-            <p className="text-red-500">{confirmPasswordError}</p>
+          {errors.confirmPassword && (
+            <p className="text-red-500">{errors.confirmPassword}</p>
           )}
 
           <input
             type="text"
             placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            onBlur={validateAddress}
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
             className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
           />
-          {addressError && <p className="text-red-500">{addressError}</p>}
+          {errors.address && <p className="text-red-500">{errors.address}</p>}
 
           <input
             type="text"
             placeholder="Phone Number"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            onBlur={validatePhoneNumber}
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleChange}
             className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
           />
-          {phoneNumberError && (
-            <p className="text-red-500">{phoneNumberError}</p>
+          {errors.phoneNumber && (
+            <p className="text-red-500">{errors.phoneNumber}</p>
           )}
-          {error && <div>{error}</div>}
 
           <div className="text-center md:text-left">
             <LMButton type="submit" disabled={loading}>
               {loading ? "Loading..." : "Register"}
             </LMButton>
           </div>
+          {submitError && <p className="text-red-500 mt-2">{submitError}</p>}
         </form>
 
         <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
