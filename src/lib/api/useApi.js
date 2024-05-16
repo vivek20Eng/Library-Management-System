@@ -19,10 +19,8 @@ const apiService = {
 
   // POST request
   post: async (url, data, baseURL) => {
-      console.log(url);
     try {
       const response = await axiosInstance.post(url, data, { baseURL });
-      console.log(response.data);
       return response.data;
     } catch (error) {
       throw new Error(error.response.data);
