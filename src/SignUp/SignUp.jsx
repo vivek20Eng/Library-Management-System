@@ -1,10 +1,11 @@
-"use client";
-import React, { useState } from "react";
-import LMButton from "../Component/LMButton";
+"use client"
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import apiService from "../lib/api/useApi.js";
+import LMToast from "../Component/LMToast";
 
 function SignUp() {
+  const ref = useRef();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -15,7 +16,6 @@ function SignUp() {
   });
 
   const [errors, setErrors] = useState({});
-  const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -24,14 +24,11 @@ function SignUp() {
       ...formData,
       [name]: value,
     });
-
-    // Validate the field onChange
     validateField(name, value);
   };
 
   const validateField = (name, value) => {
     const newErrors = { ...errors };
-
     switch (name) {
       case "fullName":
         newErrors.fullName = value.trim() ? "" : "Full Name is required";
@@ -57,42 +54,46 @@ function SignUp() {
         newErrors.address = value.trim() ? "" : "Address is required";
         break;
       case "phoneNumber":
-        newErrors.phoneNumber = value.trim() ? "" : "Phone Number is required";
+        newErrors.phoneNumber = value.trim()
+          ? ""
+          : "Phone Number is required";
         break;
       default:
         break;
     }
-
     setErrors(newErrors);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const isValid = validateFormData();
-
     if (isValid) {
       try {
         setLoading(true);
         const response = await apiService.post("api/signup", formData);
         handleToken(response);
-        // Reset submitError state on successful submission
-        setSubmitError("");
+        ref.current.showToast("Registration Successful! 🎉", "success");
+        setFormData({
+          fullName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          address: "",
+          phoneNumber: "",
+        });
       } catch (error) {
+        ref.current.showToast("Registration Failed!", "error");
         console.error("Error:", error);
-        setSubmitError("Registration failed. Please try again.");
       } finally {
         setLoading(false);
       }
     } else {
-      setSubmitError("Please fill in all fields correctly.");
+      ref.current.showToast("Please Fill All Required Fields", "warn");
     }
   };
 
   const validateFormData = () => {
     const newErrors = {};
-
-    // Validation logic...
     Object.keys(formData).forEach((key) => {
       const value = formData[key];
       switch (key) {
@@ -128,7 +129,6 @@ function SignUp() {
           break;
       }
     });
-
     setErrors(newErrors);
     return Object.values(newErrors).every((error) => error === "");
   };
@@ -141,6 +141,7 @@ function SignUp() {
 
   return (
     <div className="h-screen flex flex-col md:flex-row justify-center space-y-10 md:space-y-0 md:space-x-16 items-center my-2 mx-5 md:mx-0 md:my-0">
+      <LMToast ref={ref} />
       <div className="md:w-1/3 max-w-sm">
         <form onSubmit={handleSubmit}>
           <input
@@ -208,11 +209,14 @@ function SignUp() {
           )}
 
           <div className="text-center md:text-left">
-            <LMButton type="submit" disabled={loading}>
+            <button
+              type="submit"
+              disabled={loading}
+              className="border rounded-md px-3 py-2 mt-2 bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+            >
               {loading ? "Loading..." : "Register"}
-            </LMButton>
+            </button>
           </div>
-          {submitError && <p className="text-red-500 mt-2">{submitError}</p>}
         </form>
 
         <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
