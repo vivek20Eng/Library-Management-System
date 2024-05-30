@@ -1,7 +1,7 @@
-"use client"
+"use client";
 import React, { useState, useRef } from "react";
 import Link from "next/link";
-import apiService from "../lib/api/useApi.js";
+import axios from "axios";
 import LMToast from "../Component/LMToast";
 
 function SignUp() {
@@ -12,7 +12,9 @@ function SignUp() {
     password: "",
     confirmPassword: "",
     address: "",
+    role: "",
     phoneNumber: "",
+    username: ""
   });
 
   const [errors, setErrors] = useState({});
@@ -20,10 +22,12 @@ function SignUp() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+      ...(name === "email" && { username: value }) 
+      // Set username to email
+    }));
     validateField(name, value);
   };
 
@@ -54,9 +58,10 @@ function SignUp() {
         newErrors.address = value.trim() ? "" : "Address is required";
         break;
       case "phoneNumber":
-        newErrors.phoneNumber = value.trim()
-          ? ""
-          : "Phone Number is required";
+        newErrors.phoneNumber = value.trim() ? "" : "Phone Number is required";
+        break;
+      case "role":
+        newErrors.role = value ? "" : "Role is required";
         break;
       default:
         break;
@@ -70,8 +75,9 @@ function SignUp() {
     if (isValid) {
       try {
         setLoading(true);
-        const response = await apiService.post("api/signup", formData);
-        handleToken(response);
+        console.log(formData, "formData:");
+        const response = await axios.post("api/auth/signup", formData);
+        handleToken(response.data.token);
         ref.current.showToast("Registration Successful! 🎉", "success");
         setFormData({
           fullName: "",
@@ -79,11 +85,13 @@ function SignUp() {
           password: "",
           confirmPassword: "",
           address: "",
+          role: "",
           phoneNumber: "",
+          username: ""
         });
       } catch (error) {
         ref.current.showToast("Registration Failed!", "error");
-        console.error("Error:", error);
+        console.error("Error:", error.response ? error.response.data : error.message);
       } finally {
         setLoading(false);
       }
@@ -124,6 +132,9 @@ function SignUp() {
           newErrors.phoneNumber = value.trim()
             ? ""
             : "Phone Number is required";
+          break;
+        case "role":
+          newErrors.role = value ? "" : "Role is required";
           break;
         default:
           break;
@@ -207,6 +218,18 @@ function SignUp() {
           {errors.phoneNumber && (
             <p className="text-red-500">{errors.phoneNumber}</p>
           )}
+
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            <option value="">Select Role</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+          {errors.role && <p className="text-red-500">{errors.role}</p>}
 
           <div className="text-center md:text-left">
             <button

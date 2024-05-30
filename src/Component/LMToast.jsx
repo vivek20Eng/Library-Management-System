@@ -9,7 +9,18 @@ const LMToast = forwardRef((props, ref) => {
     }
   }));
 
-  return <ToastContainer />;
+  return <ToastContainer
+  position="top-right"
+  autoClose={1000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  closeOnClick
+  limit={3}
+  rtl={false}
+  draggable
+  pauseOnHover
+  theme="dark"
+  />;
 });
 
 export default LMToast;

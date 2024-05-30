@@ -25,8 +25,8 @@ const apiService = {
       const response = await axiosInstance.post(url, data, { baseURL });
     console.log(requestBody, 'Request Body;;');
 
-    // Assuming you have the resumeId available in the requestBody
-    const { resumeId } = requestBody;
+    // Assuming you have the userId available in the requestBody
+    const { username } = requestBody;
 
     // Insert BasicDetails
     const basicDetailsResult = await User.insert({
