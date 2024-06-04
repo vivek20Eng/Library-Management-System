@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { e, User } from '../../lib/server/models/database'
+
 
 const axiosInstance = axios.create({
   headers: {
@@ -21,6 +23,16 @@ const apiService = {
   post: async (url, data, baseURL) => {
     try {
       const response = await axiosInstance.post(url, data, { baseURL });
+    console.log(requestBody, 'Request Body;;');
+
+    // Assuming you have the userId available in the requestBody
+    const { username } = requestBody;
+
+    // Insert BasicDetails
+    const basicDetailsResult = await User.insert({
+      usename: requestBody.username || ' ',
+    
+    });
       return response.data;
     } catch (error) {
       throw new Error(error.response.data);
