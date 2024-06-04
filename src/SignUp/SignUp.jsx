@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import Link from "next/link";
 import axios from "axios";
 import LMToast from "../Component/LMToast";
-
+import {authenticate} from "../lib/authentication/auth.js"
 function SignUp() {
   const ref = useRef();
   const [formData, setFormData] = useState({
@@ -77,7 +77,7 @@ function SignUp() {
         setLoading(true);
         console.log(formData, "formData:");
         const response = await axios.post("api/auth/signup", formData);
-        handleToken(response.data.token);
+        sessionStorage.setItem("accessToken",response.data.accessToken)
         ref.current.showToast("Registration Successful! 🎉", "success");
         setFormData({
           fullName: "",
@@ -144,11 +144,7 @@ function SignUp() {
     return Object.values(newErrors).every((error) => error === "");
   };
 
-  const handleToken = (token) => {
-    localStorage.setItem("token", token);
-    // Redirect user to dashboard or another page
-    // Example: history.push('/dashboard');
-  };
+
 
   return (
     <div className="h-screen flex flex-col md:flex-row justify-center space-y-10 md:space-y-0 md:space-x-16 items-center my-2 mx-5 md:mx-0 md:my-0">

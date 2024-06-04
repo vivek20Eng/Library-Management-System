@@ -1,19 +1,20 @@
-// pages/api/user.ts
+// pages/api/auth/signup.ts
 
 import type { NextApiRequest, NextApiResponse } from "next";
 // Yup is a schema builder for runtime value parsing and validation.
 import * as yup from "yup";
-import e, { createClient, $infer } from "../../../../dbschema/edgeql-js";
+import e, { createClient } from "../../../../dbschema/edgeql-js";
+import jwt from "jsonwebtoken";
 
-export const client = createClient();
-// Define the validation schema using yup
+const client = createClient();
+
 const userSchema = yup.object().shape({
   fullName: yup.string().required("Full name is required"),
-  username: yup.string().required("Username is required"),
   email: yup
     .string()
     .email("Invalid email format")
     .required("Email is required"),
+
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")
@@ -30,15 +31,11 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    console.log("userrrr signuppppp",req.data)
-
     const { fullName, email, password, phoneNumber, role } = req.body;
-console.log(req.body,"Please:'''---")
+
     try {
-      // Validate the request body against the schema
       await userSchema.validate(req.body, { abortEarly: false });
 
-      // Create a new user
       const newUser = e.insert(e.User, {
         full_name: fullName,
         username: email,
@@ -48,18 +45,26 @@ console.log(req.body,"Please:'''---")
         role: role,
       });
 
-      // Execute the insert operation
       const result = await newUser.run(client);
 
-      // Assuming the insert operation returns the newly created user
-      return res.status(201).json(result);
+      const accessToken = jwt.sign(
+        { id: result.id, role: role, fullName },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "15m" },
+        { httpOnly: true }
+      );
+      const refreshToken = jwt.sign(
+        { id: result.id, role: role, fullName },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: "7d" },
+        { httpOnly: true }
+      );
+      res.status(201).json({ accessToken, refreshToken });
     } catch (error) {
       if (error instanceof yup.ValidationError) {
-        // If the error is a validation error, return a 400 status with the validation errors
-        return res.status(400).json({
-          error: "Validation error",
-          details: error.errors,
-        });
+        return res
+          .status(400)
+          .json({ error: "Validation error", details: error.errors });
       } else {
         console.error("Error inserting user:", error);
         return res.status(500).json({ error: "Internal Server Error" });
