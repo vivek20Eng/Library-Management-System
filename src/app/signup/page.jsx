@@ -1,6 +1,5 @@
-import SignUp from '../../SignUp/SignUp'
 import React from 'react'
-
+import SignUp from '../../Component/SignUp/SignUp'
 function page() {
   return (
     <div>

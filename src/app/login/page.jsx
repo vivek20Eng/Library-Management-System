@@ -1,5 +1,5 @@
 import React from "react";
-import Login from "../../Login/Login";
+import Login from "../../Component/Login/Login";
 
 function page() {
   return (
@@ -7,6 +7,6 @@ function page() {
         <Login />
     </div>
   );
-}
+} 
 
 export default page;

@@ -2,9 +2,9 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import axios from "axios";
-import LMToast from "../Component/LMToast";
+import LMToast from "../../Component/LMToast";
 import CircularProgress from '@mui/material/CircularProgress';
-import {authenticate} from "../lib/authentication/auth.js"
+import {authenticate} from "../../lib/authentication/auth.js"
 function SignUp() {
   const ref = useRef();
   const buttonRef = useRef();
