@@ -3,9 +3,11 @@ import React, { useState, useRef } from "react";
 import Link from "next/link";
 import axios from "axios";
 import LMToast from "../Component/LMToast";
+import CircularProgress from '@mui/material/CircularProgress';
 import {authenticate} from "../lib/authentication/auth.js"
 function SignUp() {
   const ref = useRef();
+  const buttonRef = useRef();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -157,9 +159,9 @@ function SignUp() {
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
-            className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
+            className="border rounded-md w-full text-slate-300/80 bg-transparent px-3 py-2 mt-2 focus:outline-none focus:border-[#B4ADEA]"
           />
-          {errors.fullName && <p className="text-red-500">{errors.fullName}</p>}
+          {errors.fullName && <p className="text-red-500 text-xs">{errors.fullName}</p>}
 
           <input
             type="email"
@@ -167,9 +169,9 @@ function SignUp() {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
+            className="border rounded-md w-full text-slate-300/80 bg-transparent px-3 py-2 mt-2 focus:outline-none focus:border-[#B4ADEA]"
           />
-          {errors.email && <p className="text-red-500">{errors.email}</p>}
+          {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
 
           <input
             type="password"
@@ -177,9 +179,9 @@ function SignUp() {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
+            className="border rounded-md w-full text-slate-300/80 bg-transparent px-3 py-2 mt-2 focus:outline-none focus:border-[#B4ADEA]"
           />
-          {errors.password && <p className="text-red-500">{errors.password}</p>}
+          {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
 
           <input
             type="password"
@@ -187,10 +189,10 @@ function SignUp() {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
+            className="border rounded-md w-full text-slate-300/80 bg-transparent px-3 py-2 mt-2 focus:outline-none focus:border-[#B4ADEA]"
           />
           {errors.confirmPassword && (
-            <p className="text-red-500">{errors.confirmPassword}</p>
+            <p className="text-red-500 text-xs">{errors.confirmPassword}</p>
           )}
 
           <input
@@ -199,9 +201,9 @@ function SignUp() {
             name="address"
             value={formData.address}
             onChange={handleChange}
-            className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
+            className="border rounded-md w-full text-slate-300/80 bg-transparent px-3 py-2 mt-2 focus:outline-none focus:border-[#B4ADEA]"
           />
-          {errors.address && <p className="text-red-500">{errors.address}</p>}
+          {errors.address && <p className="text-red-500 text-xs">{errors.address}</p>}
 
           <input
             type="text"
@@ -209,31 +211,32 @@ function SignUp() {
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleChange}
-            className="border rounded-md px-3 py-2 mt-2 focus:outline-none focus:border-blue-500"
+            className="border rounded-md w-full text-slate-300/80 bg-transparent px-3 py-2 mt-2 focus:outline-none focus:border-[#B4ADEA]"
           />
           {errors.phoneNumber && (
-            <p className="text-red-500">{errors.phoneNumber}</p>
+            <p className="text-red-500 text-xs">{errors.phoneNumber}</p>
           )}
 
           <select
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="bg-gray-50 border bg-transparent border-gray-300 px-3 py-2.5 text-slate-300/80 text-sm mt-2 rounded-lg focus:outline-none focus:border-[#B4ADEA] block w-full p-2."
           >
-            <option value="">Select Role</option>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
+            <option value=""class="text-black">Select Role</option>
+            <option value="admin"class="text-black">Admin</option>
+            <option value="user" class="text-black">User</option>
           </select>
-          {errors.role && <p className="text-red-500">{errors.role}</p>}
+          {errors.role && <p className="text-red-500 text-xs">{errors.role}</p>}
 
           <div className="text-center md:text-left">
             <button
               type="submit"
               disabled={loading}
-              className="border rounded-md px-3 py-2 mt-2 bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+              ref={buttonRef}
+              className="border rounded-md w-full text-[#FDFFF7] px-3 py-2 mt-2 bg-[#6b5dd5] duration-100 hover:bg-[#B4ADEA] focus:outline-none focus:bg-blue-600 dis"
             >
-              {loading ? "Loading..." : "Register"}
+              {loading ? <CircularProgress size="sm" color="success" determinate={false} />: "Register"}
             </button>
           </div>
         </form>
@@ -241,7 +244,7 @@ function SignUp() {
         <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
           Already have an account?{" "}
           <Link
-            className="text-blue-600 hover:text-blue-700 hover:underline hover:underline-offset-4"
+            className="text-[#B4ADEA] hover:text-[#B4ADEA]] hover:underline hover:underline-offset-4 "
             href="/login"
           >
             Login here
@@ -249,6 +252,7 @@ function SignUp() {
         </div>
       </div>
     </div>
+    
   );
 }
 
